@@ -14,7 +14,12 @@
         "chrisboulton/php-resque": "1.2.x"
     },
     "autoload": {
-        "psr-0": { "Wiz\\ResqueBundle": "" }
+        "psr-0": {"Wiz\\ResqueBundle": ""}
     },
-    "target-dir": "Wiz/ResqueBundle"
+    "target-dir": "Wiz/ResqueBundle",
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0-dev"
+        }
+    }
 }
