@@ -1,0 +1,20 @@
+{
+    "name": "wiz/resque-bundle",
+    "description": "The WIZ resque bundle provides integration of php-resque to Symfony2.",
+    "type": "symfony-bundle",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "JackLam",
+            "email": "jack@wizmacau.com"
+        }
+    ],
+    "require": {
+        "symfony/framework-bundle": ">=2.3,<3.0",
+        "chrisboulton/php-resque": "1.2.x"
+    },
+    "autoload": {
+        "psr-0": { "Wiz\\ResqueBundle": "" }
+    },
+    "target-dir": "Wiz/ResqueBundle"
+}
