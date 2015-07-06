@@ -1,0 +1,6 @@
+services:
+    wiz_resque.service.resque:
+        class: Wiz\ResqueBundle\Service\Resque
+        arguments: [ %wiz_resque.resque.kernel_options% ]
+        calls:
+            - [ setBackend, [ %wiz_resque.resque.redis.host%, %wiz_resque.resque.redis.port%, %wiz_resque.resque.redis.database% ] ]
