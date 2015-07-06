@@ -1,5 +1,5 @@
 {
-    "name": "wiz/resque-bundle",
+    "name": "jacklam/wiz-resque-bundle",
     "description": "The WIZ resque bundle provides integration of php-resque to Symfony2.",
     "type": "symfony-bundle",
     "license": "MIT",
