@@ -11,6 +11,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Process\Process;
 
 class StartWorkerCommand extends ContainerAwareCommand
 {
@@ -49,10 +50,82 @@ class StartWorkerCommand extends ContainerAwareCommand
         $env['QUEUE'] = $input->getArgument('queues');
         $env['VERBOSE'] = 1;
 
+        if ($input->getOption('verbose')) {
+            $env['VVERBOSE'] = 1;
+        }
+        if ($input->getOption('quiet')) {
+            unset($env['VERBOSE']);
+        }
 
-        $redisHost = $this->getContainer()->getParameter('bcc_resque.resque.redis.host');
-        $redisPort = $this->getContainer()->getParameter('bcc_resque.resque.redis.port');
-        $redisDatabase = $this->getContainer()->getParameter('bcc_resque.resque.redis.database');
+        $redisHost = $this->getContainer()->getParameter('wiz_resque.resque.redis.host');
+        $redisPort = $this->getContainer()->getParameter('wiz_resque.resque.redis.port');
+        $redisDatabase = $this->getContainer()->getParameter('wiz_resque.resque.redis.database');
+
+        if ($redisHost != null && $redisPort != null) {
+            $env['REDIS_BACKEND'] = $redisHost . ':' . $redisPort;
+        }
+
+        if (isset($redisDatabase)) {
+            $env['REDIS_BACKEND_DB'] = $redisDatabase;
+        }
+
+        $opt = '';
+        if (0 !== $m = (int)$input->getOption('memory-limit')) {
+            $opt = sprintf('-d memory_limit=%dM', $m);
+        }
+
+        if (version_compare(PHP_VERSION, '5.4.0') >= 0) {
+            $phpExecutable = PHP_BINARY;
+        } else {
+            $phpExecutable = PHP_BINDIR . '/php';
+            if (defined('PHP_WINDOWS_VERSION_BUILD')) {
+                $phpExecutable = 'php';
+            }
+        }
+
+        $workerCommand = strtr('%php% %opt% %dir%/resque', array(
+            '%php%' => $phpExecutable,
+            '%opt%' => $opt,
+            '%dir%' => __DIR__ . '/../bin',
+        ));
+
+        if (!$input->getOption('foreground')) {
+            $workerCommand = strtr('nohup %cmd% > %logs_dir%/resque.log 2>&1 & echo $!', array(
+                '%cmd%' => $workerCommand,
+                '%logs_dir%' => $this->getContainer()->getParameter('kernel.logs_dir'),
+            ));
+        }
+
+        if (defined('PHP_WINDOWS_VERSION_BUILD')) {
+            foreach ($env as $key => $value) {
+                putenv($key . "=" . $value);
+            }
+            $env = null;
+        }
+
+        $process = new Process($workerCommand, null, $env, null, null);
+
+        if (!$input->getOption('quiet')) {
+            $output->writeln(\sprintf('Starting worker <info>%s</info>', $process->getCommandLine()));
+        }
+
+        // if foreground, we redirect output
+        if ($input->getOption('foreground')) {
+            $process->run(function ($type, $buffer) use ($output) {
+                $output->write($buffer);
+            });
+        } else {
+            $process->run();
+            $pid = trim($process->getOutput());
+            if (function_exists('gethostname')) {
+                $hostname = gethostname();
+            } else {
+                $hostname = php_uname('n');
+            }
+            if (!$input->getOption('quiet')) {
+                $output->writeln(\sprintf('<info>Worker started</info> %s:%s:%s', $hostname, $pid, $input->getArgument('queues')));
+            }
+        }
     }
 
 }

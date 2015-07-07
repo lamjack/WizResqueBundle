@@ -11,11 +11,16 @@
     ],
     "require": {
         "symfony/framework-bundle": ">=2.3,<3.0",
-        "chrisboulton/php-resque": "1.2.x"
+        "chrisboulton/php-resque": "dev-master",
+        "chrisboulton/php-resque-scheduler": "dev-master"
     },
     "autoload": {
         "psr-0": {"Wiz\\ResqueBundle": ""}
     },
+    "bin": [
+        "bin/resque",
+        "bin/resque-scheduler"
+    ],
     "target-dir": "Wiz/ResqueBundle",
     "extra": {
         "branch-alias": {
