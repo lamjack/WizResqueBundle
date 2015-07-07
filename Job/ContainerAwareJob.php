@@ -50,8 +50,7 @@ abstract class ContainerAwareJob extends Job
         $results = iterator_to_array($finder);
         /** @var \Symfony\Component\Finder\SplFileInfo $file */
         $file = current($results);
-        $class = $file->getBasename();
-
+        $class = $file->getBasename('.php');
         require_once $file;
 
         return new $class(

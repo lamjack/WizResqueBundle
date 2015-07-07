@@ -22,5 +22,28 @@ abstract class Job
      */
     public $args = array();
 
-    abstract public function run(&$args);
+    /**
+     * Set up environment for this job
+     */
+    public function setUp()
+    {
+
+    }
+
+    /**
+     * Run job
+     */
+    public function perform()
+    {
+        $this->run($this->args);
+    }
+
+    /**
+     * Remove environment for this job
+     */
+    public function tearDown()
+    {
+    }
+
+    abstract public function run($args);
 }

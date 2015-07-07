@@ -8,6 +8,7 @@ namespace Wiz\ResqueBundle\Service;
 
 use Wiz\ResqueBundle\Job\ContainerAwareJob;
 use Wiz\ResqueBundle\Job\Job;
+use Wiz\ResqueBundle\Model\Queue;
 
 /**
  * Class Resque
@@ -69,5 +70,25 @@ class Resque
         }
 
         return null;
+    }
+
+    /**
+     * @return array
+     */
+    public function getQueues()
+    {
+        return array_map(function ($queue) {
+            return new Queue($queue);
+        }, \Resque::queues());
+    }
+
+    /**
+     * @param string $queue
+     *
+     * @return Queue
+     */
+    public function getQueue($queue)
+    {
+        return new Queue($queue);
     }
 }
