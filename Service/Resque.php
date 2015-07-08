@@ -6,9 +6,11 @@
 
 namespace Wiz\ResqueBundle\Service;
 
+use Psr\Log\NullLogger;
 use Wiz\ResqueBundle\Job\ContainerAwareJob;
 use Wiz\ResqueBundle\Job\Job;
 use Wiz\ResqueBundle\Model\Queue;
+use Wiz\ResqueBundle\Model\Worker;
 
 /**
  * Class Resque
@@ -90,5 +92,57 @@ class Resque
     public function getQueue($queue)
     {
         return new Queue($queue);
+    }
+
+    /**
+     * Get workers list
+     *
+     * @return array
+     */
+    public function getWorkers()
+    {
+        return array_map(function ($worker) {
+            return new Worker($worker);
+        }, \Resque_Worker::all());
+    }
+
+    /**
+     * Get worker by id
+     *
+     * @param $id
+     *
+     * @return null|Worker
+     */
+    public function getWorker($id)
+    {
+        $worker = \Resque_Worker::find($id);
+        if (!$worker) {
+            return null;
+        }
+        return new Worker($worker);
+    }
+
+    /**
+     *
+     */
+    public function pruneDeadWorkers()
+    {
+        $worker = new \Resque_Worker('temp');
+        $worker->setLogger(new NullLogger());
+        $worker->pruneDeadWorkers();
+    }
+
+    /**
+     * @param $queue
+     *
+     * @return int
+     */
+    public function clearQueue($queue)
+    {
+        /** @var \Redis $redis */
+        $redis = \Resque::redis();
+        $size = $redis->lLen('queue:' . $queue);
+        $redis->del('queue:' . $queue);
+        return $size;
     }
 }
