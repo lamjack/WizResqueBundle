@@ -13,6 +13,10 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Process;
 
+/**
+ * Class StartWorkerCommand
+ * @package Wiz\ResqueBundle\Command
+ */
 class StartWorkerCommand extends ContainerAwareCommand
 {
     protected function configure()
@@ -27,6 +31,12 @@ class StartWorkerCommand extends ContainerAwareCommand
             ->addOption('memory-limit', '-m', InputOption::VALUE_REQUIRED, 'Force cli memory_limit (expressed in Mbytes)');
     }
 
+    /**
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     *
+     * @return int
+     */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $env = array();
@@ -83,10 +93,11 @@ class StartWorkerCommand extends ContainerAwareCommand
             }
         }
 
+        $bin_path = realpath($this->getContainer()->getParameter('kernel.root_dir') . '/../bin');
         $workerCommand = strtr('%php% %opt% %dir%/resque', array(
             '%php%' => $phpExecutable,
             '%opt%' => $opt,
-            '%dir%' => __DIR__ . '/../bin',
+            '%dir%' => $bin_path
         ));
 
         if (!$input->getOption('foreground')) {
@@ -109,7 +120,7 @@ class StartWorkerCommand extends ContainerAwareCommand
             $output->writeln(\sprintf('Starting worker <info>%s</info>', $process->getCommandLine()));
         }
 
-        // if foreground, we redirect output
+        // 前台运行则不另启进程
         if ($input->getOption('foreground')) {
             $process->run(function ($type, $buffer) use ($output) {
                 $output->write($buffer);
@@ -126,6 +137,7 @@ class StartWorkerCommand extends ContainerAwareCommand
                 $output->writeln(\sprintf('<info>Worker started</info> %s:%s:%s', $hostname, $pid, $input->getArgument('queues')));
             }
         }
-    }
 
+        return 0;
+    }
 }
