@@ -52,6 +52,14 @@ class Resque
     }
 
     /**
+     * @param $prefix
+     */
+    public function setPrefix($prefix)
+    {
+        \Resque_Redis::prefix($prefix);
+    }
+
+    /**
      * 入队
      *
      * @param Job $job

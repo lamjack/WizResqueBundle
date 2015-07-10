@@ -33,6 +33,10 @@ class WizResqueExtension extends Extension
         $loader->load('services.yml');
 
         $pa = PropertyAccess::createPropertyAccessor();
+        if (!is_null($config['prefix'])) {
+            $container->setParameter('wiz_resque.resque.prefix', $pa->getValue($config, '[prefix]'));
+        }
+
         $container->setParameter('wiz_resque.resque.redis.host', $pa->getValue($config, '[redis][host]'));
         $container->setParameter('wiz_resque.resque.redis.port', $pa->getValue($config, '[redis][port]'));
         $container->setParameter('wiz_resque.resque.redis.database', $pa->getValue($config, '[redis][database]'));

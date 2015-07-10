@@ -60,6 +60,11 @@ class StartWorkerCommand extends ContainerAwareCommand
         $env['QUEUE'] = $input->getArgument('queues');
         $env['VERBOSE'] = 1;
 
+        $prefix = $this->getContainer()->getParameter('wiz_resque.resque.prefix');
+        if (!is_null($prefix) && strlen($prefix) > 0) {
+            $env['PREFIX'] = $prefix;
+        }
+
         if ($input->getOption('verbose')) {
             $env['VVERBOSE'] = 1;
         }
