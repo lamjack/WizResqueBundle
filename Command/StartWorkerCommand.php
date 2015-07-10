@@ -98,7 +98,7 @@ class StartWorkerCommand extends ContainerAwareCommand
             }
         }
 
-        $bin_path = realpath($this->getContainer()->getParameter('kernel.root_dir') . '/../bin');
+        $bin_path = $this->getContainer()->getParameter('kernel.root_dir') . '/../bin';
         $workerCommand = strtr('%php% %opt% %dir%/resque', array(
             '%php%' => $phpExecutable,
             '%opt%' => $opt,
