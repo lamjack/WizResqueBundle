@@ -26,6 +26,9 @@ class Configuration implements ConfigurationInterface
         $root
             ->addDefaultsIfNotSet()
             ->children()
+                ->scalarNode('prefix')
+                    ->isRequired()
+                ->end()
                 ->arrayNode('redis')
                     ->addDefaultsIfNotSet()
                     ->children()
