@@ -22,7 +22,7 @@ class StartWorkerCommand extends ContainerAwareCommand
     protected function configure()
     {
         $this
-            ->setName('wiz:resque:worker-start')
+            ->setName('resque:worker-start')
             ->setDescription('Start a resque worker')
             ->addArgument('queues', InputArgument::REQUIRED, 'Queue names')
             ->addOption('count', 'c', InputOption::VALUE_REQUIRED, 'How many workers to fork', 1)

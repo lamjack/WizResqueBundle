@@ -15,12 +15,22 @@ abstract class Job
     /**
      * @var string Queue name
      */
-    public $queue = 'default';
+    public $queue;
 
     /**
      * @var array The job args
      */
     public $args = array();
+
+    /**
+     * Job constructor.
+     *
+     * @param string $queue
+     */
+    public function __construct($queue = 'default')
+    {
+        $this->queue = $queue;
+    }
 
     /**
      * Set up environment for this job

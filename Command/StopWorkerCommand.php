@@ -21,7 +21,7 @@ class StopWorkerCommand extends ContainerAwareCommand
     protected function configure()
     {
         $this
-            ->setName('wiz:resque:worker-stop')
+            ->setName('resque:worker-stop')
             ->setDescription('Stop a resque worker')
             ->addArgument('id', InputArgument::OPTIONAL, 'Worker id')
             ->addOption('all', 'a', InputOption::VALUE_NONE, 'Should kill all workers');

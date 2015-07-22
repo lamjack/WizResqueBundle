@@ -37,9 +37,12 @@ class WizResqueExtension extends Extension
             $container->setParameter('wiz_resque.resque.prefix', $pa->getValue($config, '[prefix]'));
         }
 
+        $vendor_dir = $container->getParameter('kernel.root_dir') . '/../vendor';
+
         $container->setParameter('wiz_resque.resque.redis.host', $pa->getValue($config, '[redis][host]'));
         $container->setParameter('wiz_resque.resque.redis.port', $pa->getValue($config, '[redis][port]'));
         $container->setParameter('wiz_resque.resque.redis.database', $pa->getValue($config, '[redis][database]'));
+        $container->setParameter('wiz_resque.vendor_dir', $vendor_dir);
         $container->setParameter('wiz_resque.resque.kernel_options', array(
             'kernel.root_dir' => $container->getParameter('kernel.root_dir'),
             'kernel.debug' => $container->getParameter('kernel.debug'),

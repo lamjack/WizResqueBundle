@@ -69,10 +69,7 @@ class Resque
      */
     public function enqueue(Job $job, $track_status = false)
     {
-        if ($job instanceof ContainerAwareJob) {
-            $job->setKernelOptions($this->kernelOptions);
-        }
-
+        $this->jobReady($job);
         $result = \Resque::enqueue($job->queue, get_class($job), $job->args, $track_status);
 
         if ($track_status) {
@@ -80,6 +77,30 @@ class Resque
         }
 
         return null;
+    }
+
+    /**
+     * 设置Job执行时间
+     *
+     * @param \Datetime|int $at
+     * @param Job $job
+     */
+    public function enqueueAt($at, Job $job)
+    {
+        $this->jobReady($job);
+        \ResqueScheduler::enqueueAt($at, $job->queue, get_class($job), $job->args);
+    }
+
+    /**
+     * 设置Job N秒后执行
+     *
+     * @param int $in 几秒后执行
+     * @param Job $job
+     */
+    public function enqueueIn($in, Job $job)
+    {
+        $this->jobReady($job);
+        \ResqueScheduler::enqueueIn($in, $job->queue, get_class($job), $job->args);
     }
 
     /**
@@ -152,5 +173,12 @@ class Resque
         $size = $redis->lLen('queue:' . $queue);
         $redis->del('queue:' . $queue);
         return $size;
+    }
+
+    protected function jobReady(Job $job)
+    {
+        if ($job instanceof ContainerAwareJob) {
+            $job->setKernelOptions($this->kernelOptions);
+        }
     }
 }
