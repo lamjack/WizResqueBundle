@@ -15,7 +15,9 @@
         "chrisboulton/php-resque-scheduler": "dev-master"
     },
     "autoload": {
-        "psr-0": {"Wiz\\ResqueBundle": ""}
+        "psr-0": {
+            "Wiz\\ResqueBundle": ""
+        }
     },
     "bin": [
         "bin/resque",
