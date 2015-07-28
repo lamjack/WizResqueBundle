@@ -37,6 +37,14 @@ final class Worker
     }
 
     /**
+     * @return array
+     */
+    public function getQueues()
+    {
+        return $this->worker->queues();
+    }
+
+    /**
      * @return int
      */
     public function getProcessedCount()
