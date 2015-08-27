@@ -34,7 +34,7 @@ class WizResqueExtension extends Extension
 
         $pa = PropertyAccess::createPropertyAccessor();
         if (!is_null($config['prefix'])) {
-            $container->setParameter('wiz_resque.resque.prefix', $pa->getValue($config, '[prefix]'));
+            $container->setParameter('wiz_resque.resque.prefix', $pa->getValue($config, '[prefix]') . ':resque');
         }
 
         $vendor_dir = $container->getParameter('kernel.root_dir') . '/../vendor';
