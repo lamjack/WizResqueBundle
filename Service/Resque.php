@@ -6,11 +6,14 @@
 
 namespace Wiz\ResqueBundle\Service;
 
+use Monolog\Handler\RedisHandler;
+use Monolog\Logger;
 use Psr\Log\NullLogger;
 use Wiz\ResqueBundle\Job\ContainerAwareJob;
 use Wiz\ResqueBundle\Job\Job;
 use Wiz\ResqueBundle\Model\Queue;
 use Wiz\ResqueBundle\Model\Worker;
+use Wiz\ResqueBundle\Resque\LogPlugin;
 
 /**
  * Class Resque
@@ -70,6 +73,17 @@ class Resque
     public function enqueue(Job $job, $track_status = false)
     {
         $this->jobReady($job);
+
+        $redis = new \Redis();
+        $redis->pconnect(\Resque_Redis::DEFAULT_HOST, \Resque_Redis::DEFAULT_PORT);
+        $log = new Logger('workers');
+        $logHandle = new RedisHandler($redis, \Resque_Redis::getPrefix() . 'logs');
+        $log->pushHandler($logHandle);
+        LogPlugin::init([
+            'logger' => $log,
+            'vverbose' => true
+        ]);
+
         $result = \Resque::enqueue($job->queue, get_class($job), $job->args, $track_status);
 
         if ($track_status) {

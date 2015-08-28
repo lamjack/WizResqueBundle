@@ -51,35 +51,18 @@ if (!empty($PREFIX)) {
     $logger->log(Psr\Log\LogLevel::INFO, 'Prefix set to {prefix}', array('prefix' => $PREFIX));
     Resque_Redis::prefix($PREFIX);
 }
-// If set, re-attach failed jobs based on retry_strategy
-Resque_Event::listen('onFailure', function (Exception $exception, Resque_Job $job) use ($logger) {
-    $args = $job->getArguments();
-    if (empty($args['bcc_resque.retry_strategy'])) {
-        return;
-    }
-    if (!isset($args['bcc_resque.retry_attempt'])) {
-        $args['bcc_resque.retry_attempt'] = 0;
-    }
-    $backoff = $args['bcc_resque.retry_strategy'];
-    if (!isset($backoff[$args['bcc_resque.retry_attempt']])) {
-        return;
-    }
-    $delay = $backoff[$args['bcc_resque.retry_attempt']];
-    $args['bcc_resque.retry_attempt']++;
-    if ($delay == 0) {
-        Resque::enqueue($job->queue, $job->payload['class'], $args);
-        $logger->log(Psr\Log\LogLevel::ERROR, 'Job failed. Auto re-queued, attempt number: {attempt}', array(
-                'attempt' => $args['bcc_resque.retry_attempt'] - 1)
-        );
-    } else {
-        $at = time() + $delay;
-        Resque::enqueueAt($at, $job->queue, $job->payload['class'], $args);
-        $logger->log(Psr\Log\LogLevel::ERROR, 'Job failed. Auto re-queued. Scheduled for: {timestamp}, attempt number: {attempt}', array(
-            'timestamp' => date('Y-m-d H:i:s', $at),
-            'attempt' => $args['bcc_resque.retry_attempt'] - 1,
-        ));
-    }
-});
+
+// Custom event listener
+$redis = new Redis();
+$redis->pconnect(Resque_Redis::DEFAULT_HOST, Resque_Redis::DEFAULT_PORT);
+$log = new \Monolog\Logger('workers');
+$logHandle = new \Monolog\Handler\RedisHandler($redis, \Resque_Redis::getPrefix() . 'logs');
+$log->pushHandler($logHandle);
+\Wiz\ResqueBundle\Resque\LogPlugin::init([
+    'logger' => $log,
+    'vverbose' => true
+]);
+
 if ($count > 1) {
     for ($i = 0; $i < $count; ++$i) {
         $pid = Resque::fork();
