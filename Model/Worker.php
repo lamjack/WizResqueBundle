@@ -29,11 +29,14 @@ final class Worker
 
     /**
      * 停止Worker
+     *
+     * @return bool
      */
     public function stop()
     {
         $parts = explode(':', $this->getId());
-        posix_kill($parts[1], SIGQUIT);
+        $status = posix_kill($parts[1], SIGQUIT);
+        return $status;
     }
 
     /**
