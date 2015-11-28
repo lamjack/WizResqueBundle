@@ -11,8 +11,8 @@
     ],
     "require": {
         "symfony/framework-bundle": ">=2.3,<3.0",
-        "chrisboulton/php-resque": "dev-master",
-        "chrisboulton/php-resque-scheduler": "dev-master"
+        "chrisboulton/php-resque": "~1.2",
+        "chrisboulton/php-resque-scheduler": "~1.1"
     },
     "autoload": {
         "psr-0": {
