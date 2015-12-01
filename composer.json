@@ -1,29 +1,29 @@
 {
-    "name": "jacklam/wiz-resque-bundle",
+    "name": "wiz/resque-bundle",
     "description": "The WIZ resque bundle provides integration of php-resque to Symfony2.",
     "type": "symfony-bundle",
     "license": "MIT",
     "authors": [
         {
             "name": "JackLam",
-            "email": "jack@wizmacau.com"
+            "email": "jack@wizmacau.com",
+            "homepage": "https://jacklam.it"
         }
     ],
     "require": {
         "symfony/framework-bundle": ">=2.3,<3.0",
-        "chrisboulton/php-resque": "dev-master",
-        "chrisboulton/php-resque-scheduler": "dev-master"
+        "chrisboulton/php-resque": "1.2.x",
+        "chrisboulton/php-resque-scheduler": "1.1.x"
     },
     "autoload": {
-        "psr-0": {
-            "Wiz\\ResqueBundle": ""
+        "psr-4": {
+            "Wiz\\ResqueBundle\\": ""
         }
     },
     "bin": [
         "bin/resque",
         "bin/resque-scheduler"
     ],
-    "target-dir": "Wiz/ResqueBundle",
     "extra": {
         "branch-alias": {
             "dev-master": "1.0-dev"
