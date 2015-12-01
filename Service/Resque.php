@@ -32,6 +32,11 @@ class Resque
     private $kernelOptions;
 
     /**
+     * @var string
+     */
+    private $prefix = '';
+
+    /**
      * @param array $kernelOptions
      */
     function __construct(array $kernelOptions)
@@ -59,7 +64,8 @@ class Resque
      */
     public function setPrefix($prefix)
     {
-        \Resque_Redis::prefix($prefix);
+        $this->prefix = $prefix;
+        \Resque_Redis::prefix($this->prefix);
     }
 
     /**
@@ -75,9 +81,9 @@ class Resque
         $this->jobReady($job);
 
         $redis = new \Redis();
-        $redis->pconnect(\Resque_Redis::DEFAULT_HOST, \Resque_Redis::DEFAULT_PORT);
+        $redis->pconnect($this->redisConfiguration['host'], $this->redisConfiguration['port']);
         $log = new Logger('workers');
-        $logHandle = new RedisHandler($redis, \Resque_Redis::getPrefix() . 'logs');
+        $logHandle = new RedisHandler($redis, $this->prefix . 'logs');
         $log->pushHandler($logHandle);
         LogPlugin::init([
             'logger' => $log,
@@ -171,7 +177,7 @@ class Resque
     public function pruneDeadWorkers()
     {
         $worker = new \Resque_Worker('temp');
-        $worker->setLogger(new NullLogger());
+        //$worker->setLogger(new NullLogger());
         $worker->pruneDeadWorkers();
     }
 
