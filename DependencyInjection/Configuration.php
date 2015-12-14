@@ -45,6 +45,20 @@ class Configuration implements ConfigurationInterface
                         ->end()
                     ->end()
                 ->end()
+                ->arrayNode('auto_retry')
+                    ->beforeNormalization()
+                        ->ifArray()
+                        ->then(function($config) {
+                            if (array_key_exists(0, $config)) {
+                                return array($config);
+                            }
+                            return $config;
+                        })
+                    ->end()
+                    ->prototype('array')
+                        ->prototype('scalar')->end()
+                    ->end()
+                ->end()
             ->end();
 
         return $tree_builder;
