@@ -66,6 +66,5 @@ class WizResqueExtension extends Extension
                 $definition->addMethodCall('setJobRetryStorage', array($retry));
             }
         }
-        \Kint::dump($retry);
     }
 }
