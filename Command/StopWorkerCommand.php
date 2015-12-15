@@ -11,6 +11,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Wiz\ResqueBundle\Model\Worker;
 
 /**
  * Class StopWorkerCommand
@@ -58,10 +59,19 @@ class StopWorkerCommand extends ContainerAwareCommand
         }
 
         foreach ($workers as $worker) {
-            /** @var \Wiz\ResqueBundle\Model\Worker $worker */
-            $output->writeln(sprintf('<info>Stoping worker %s...</info>', $worker->getId()));
-            $worker->stop();
+            /** @var Worker $worker */
+            if (version_compare(phpversion(), '7.0.0', '<')) {
+                $output->writeln(sprintf('<info>Stoping worker %s...</info>', $worker->getId()));
+                $status = $worker->stop();
+            } else {
+                $output->writeln(sprintf('<info>Killing worker %s...</info>', $worker->getId()));
+                $status = $worker->kill();
+            }
+            if (false === $status)
+                $output->writeln(sprintf('<error>Stop or Kill worker %s failed</error>'));
         }
+
+        $resque->pruneDeadWorkers();
 
         return 0;
     }

@@ -28,7 +28,7 @@ final class Worker
     }
 
     /**
-     * 停止Worker
+     * Quit Worker
      *
      * @return bool
      */
@@ -37,6 +37,19 @@ final class Worker
         $parts = explode(':', $this->getId());
         $status = posix_kill($parts[1], SIGQUIT);
         return $status;
+    }
+
+    /**
+     * Kill worker
+     *
+     * @return bool
+     */
+    public function kill()
+    {
+        $parts = explode(':', $this->getId());
+        if (null === $this->getCurrentJob())
+            return posix_kill($parts[1], SIGKILL);
+        return false;
     }
 
     /**

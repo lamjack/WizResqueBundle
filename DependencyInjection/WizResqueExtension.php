@@ -56,7 +56,7 @@ class WizResqueExtension extends Extension
         $retry = $pa->getValue($config, '[auto_retry]');
         $definition = $container->getDefinition('wiz_resque.service.resque');
         if (count($retry) > 0) {
-            if (count($retry) === 1) {
+            if (count($retry) === 1 && array_key_exists(0, $retry)) {
                 $definition->addMethodCall('setGlobalRetryStorage', array($retry[0]));
             } else {
                 if (array_key_exists('default', $retry)) {
