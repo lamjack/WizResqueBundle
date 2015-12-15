@@ -63,6 +63,46 @@ $log->pushHandler($logHandle);
     'vverbose' => true
 ]);
 
+// Retry
+Resque_Event::listen('onFailure', function (Exception $e, Resque_Job $job) use ($logger) {
+    $args = $job->getArguments();
+
+    if (!array_key_exists(\Wiz\ResqueBundle\Job\Job::RETRY_STORAGE, $args))
+        return;
+
+    if (!array_key_exists(\Wiz\ResqueBundle\Job\Job::RETRY_ATTEMPT, $args))
+        $args[\Wiz\ResqueBundle\Job\Job::RETRY_ATTEMPT] = 0;
+
+    $backoff = $args[\Wiz\ResqueBundle\Job\Job::RETRY_STORAGE];
+    if (!array_key_exists($args[\Wiz\ResqueBundle\Job\Job::RETRY_ATTEMPT], $backoff))
+        return;
+
+    $delay = $backoff[$args[\Wiz\ResqueBundle\Job\Job::RETRY_ATTEMPT]];
+    $args[\Wiz\ResqueBundle\Job\Job::RETRY_ATTEMPT]++;
+
+    if ($delay == 0) {
+        Resque::enqueue($job->queue, $job->payload['class'], $args);
+        $logger->log(
+            \Psr\Log\LogLevel::ERROR,
+            'Job failed. Auto re-queued, attempt number: {attempt}',
+            array(
+                'attempt' => $args[\Wiz\ResqueBundle\Job\Job::RETRY_ATTEMPT] - 1
+            )
+        );
+    } else {
+        $at = time() + $delay;
+        ResqueScheduler::enqueueAt($at, $job->queue, $job->payload['class'], $args);
+        $logger->log(
+            \Psr\Log\LogLevel::ERROR,
+            'Job failed. Auto re-queued. Scheduled for: {timestamp}, attempt number: {attempt}',
+            array(
+                'timestamp' => date('Y-m-d H:i:s', $at),
+                'attempt' => $args[\Wiz\ResqueBundle\Job\Job::RETRY_ATTEMPT] - 1
+            )
+        );
+    }
+});
+
 if ($count > 1) {
     for ($i = 0; $i < $count; ++$i) {
         $pid = Resque::fork();

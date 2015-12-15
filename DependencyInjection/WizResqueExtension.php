@@ -17,7 +17,7 @@ class WizResqueExtension extends Extension
     /**
      * Loads a specific configuration.
      *
-     * @param array $configs An array of configuration values
+     * @param array $configs              An array of configuration values
      * @param ContainerBuilder $container A ContainerBuilder instance
      *
      * @throws \InvalidArgumentException When provided tag is not defined in this extension
@@ -39,14 +39,33 @@ class WizResqueExtension extends Extension
 
         $vendor_dir = $container->getParameter('kernel.root_dir') . '/../vendor';
 
+        // Redis
         $container->setParameter('wiz_resque.resque.redis.host', $pa->getValue($config, '[redis][host]'));
         $container->setParameter('wiz_resque.resque.redis.port', $pa->getValue($config, '[redis][port]'));
         $container->setParameter('wiz_resque.resque.redis.database', $pa->getValue($config, '[redis][database]'));
+
+        // Env
         $container->setParameter('wiz_resque.vendor_dir', $vendor_dir);
         $container->setParameter('wiz_resque.resque.kernel_options', array(
             'kernel.root_dir' => $container->getParameter('kernel.root_dir'),
             'kernel.debug' => $container->getParameter('kernel.debug'),
             'kernel.environment' => $container->getParameter('kernel.environment')
         ));
+
+        // Retry
+        $retry = $pa->getValue($config, '[auto_retry]');
+        $definition = $container->getDefinition('wiz_resque.service.resque');
+        if (count($retry) > 0) {
+            if (count($retry) === 1) {
+                $definition->addMethodCall('setGlobalRetryStorage', array($retry[0]));
+            } else {
+                if (array_key_exists('default', $retry)) {
+                    $definition->addMethodCall('setGlobalRetryStorage', array($retry['default']));
+                    unset($retry['default']);
+                }
+                $definition->addMethodCall('setJobRetryStorage', array($retry));
+            }
+        }
+        \Kint::dump($retry);
     }
 }

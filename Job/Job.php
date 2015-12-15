@@ -12,6 +12,9 @@ namespace Wiz\ResqueBundle\Job;
  */
 abstract class Job
 {
+    const RETRY_STORAGE = '_retry_storage';
+    const RETRY_ATTEMPT = '_retry_attempt';
+
     /**
      * @var string Queue name
      */
@@ -41,6 +44,13 @@ abstract class Job
     }
 
     /**
+     * Remove environment for this job
+     */
+    public function tearDown()
+    {
+    }
+
+    /**
      * Run job
      */
     public function perform()
@@ -48,12 +58,11 @@ abstract class Job
         $this->run($this->args);
     }
 
-    /**
-     * Remove environment for this job
-     */
-    public function tearDown()
-    {
-    }
 
+    /**
+     * @param $args
+     *
+     * @return mixed
+     */
     abstract public function run($args);
 }

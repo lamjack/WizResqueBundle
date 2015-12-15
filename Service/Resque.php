@@ -10,6 +10,7 @@ use Monolog\Handler\RedisHandler;
 use Monolog\Logger;
 use Psr\Log\NullLogger;
 use Wiz\ResqueBundle\Job\ContainerAwareJob;
+use Wiz\ResqueBundle\Job\FailedJob;
 use Wiz\ResqueBundle\Job\Job;
 use Wiz\ResqueBundle\Model\Queue;
 use Wiz\ResqueBundle\Model\Worker;
@@ -35,6 +36,20 @@ class Resque
      * @var string
      */
     private $prefix = '';
+
+    /**
+     * Global retry storage
+     *
+     * @var array
+     */
+    private $globalRetryStorage = array();
+
+    /**
+     * Job retry storage
+     *
+     * @var array
+     */
+    private $jobRetryStorage = array();
 
     /**
      * @param array $kernelOptions
@@ -66,6 +81,22 @@ class Resque
     {
         $this->prefix = $prefix;
         \Resque_Redis::prefix($this->prefix);
+    }
+
+    /**
+     * @param array $globalRetryStorage
+     */
+    public function setGlobalRetryStorage(array $globalRetryStorage)
+    {
+        $this->globalRetryStorage = $globalRetryStorage;
+    }
+
+    /**
+     * @param array $jobRetryStorage
+     */
+    public function setJobRetryStorage(array $jobRetryStorage)
+    {
+        $this->jobRetryStorage = $jobRetryStorage;
     }
 
     /**
@@ -177,7 +208,7 @@ class Resque
     public function pruneDeadWorkers()
     {
         $worker = new \Resque_Worker('temp');
-        //$worker->setLogger(new NullLogger());
+        $worker->setLogger(new NullLogger());
         $worker->pruneDeadWorkers();
     }
 
@@ -195,10 +226,115 @@ class Resque
         return $size;
     }
 
+    /**
+     * @return array
+     */
+    public function getFailedJobs()
+    {
+        $out = array();
+
+        $jobs = call_user_func_array(
+            array(\Resque::redis(), 'lrange'),
+            array('failed', 0, -1)
+        );
+
+        foreach ($jobs as $job) {
+            array_push($out, new FailedJob(json_decode($jobs, true)));
+        }
+
+        return $out;
+    }
+
+    /**
+     * @return array
+     */
+    public function getDelayedJobDatetimes()
+    {
+        $out = array();
+
+        $timestamps = call_user_func_array(
+            array(\Resque::redis(), 'zrange'),
+            array('delayed_queue_schedule', 0, -1));
+
+        foreach ($timestamps as $timestamp) {
+            $datetime = new \DateTime();
+            $datetime->setTimestamp($timestamp);
+            $out[] = array($datetime, call_user_func_array(
+                array(\Resque::redis(), 'llen'),
+                array('delayed:' . $timestamp)
+            ));
+        }
+
+        return $out;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getFirstDelayedJobDatetime()
+    {
+        $delayedDatetimes = $this->getDelayedJobDatetimes();
+        if (count($delayedDatetimes) > 0)
+            return $delayedDatetimes[0];
+        else
+            return null;
+    }
+
+    /**
+     * @param $timestamp
+     *
+     * @return array
+     */
+    public function getJobsWithTimestamp($timestamp)
+    {
+        $out = array();
+
+        $jobs = call_user_func_array(
+            array(\Resque::redis(), 'lrange'),
+            array('delayed:' . $timestamp, 0, -1)
+        );
+
+        foreach ($jobs as $job) {
+            $out[] = json_decode($job, true);
+        }
+
+        return $out;
+    }
+
+    /**
+     * @return int
+     */
+    public function getNumberOfDelayedJobs()
+    {
+        return \ResqueScheduler::getDelayedQueueScheduleSize();
+    }
+
+    /**
+     * @param Job $job
+     */
     protected function jobReady(Job $job)
     {
         if ($job instanceof ContainerAwareJob) {
             $job->setKernelOptions($this->kernelOptions);
+        }
+
+        $this->attachRetryStorage($job);
+    }
+
+    /**
+     * @param Job $job
+     */
+    protected function attachRetryStorage(Job $job)
+    {
+        $class = get_class($job);
+
+        // If has custom retry storage
+        if (array_key_exists($class, $this->jobRetryStorage)) {
+            $job->args[Job::RETRY_STORAGE] = $this->jobRetryStorage[$class];
+        } else {
+            if (count($this->globalRetryStorage)) {
+                $job->args[Job::RETRY_STORAGE] = $this->globalRetryStorage;
+            }
         }
     }
 }
