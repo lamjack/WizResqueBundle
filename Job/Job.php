@@ -62,7 +62,7 @@ abstract class Job
     /**
      * @param $args
      *
-     * @return mixed
+     * @return int 如果运行成功请返回0
      */
     abstract public function run($args);
 }
