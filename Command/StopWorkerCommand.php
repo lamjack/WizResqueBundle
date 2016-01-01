@@ -68,7 +68,7 @@ class StopWorkerCommand extends ContainerAwareCommand
                 $status = $worker->kill();
             }
             if (false === $status)
-                $output->writeln(sprintf('<error>Stop or Kill worker %s failed</error>'));
+                $output->writeln(sprintf('<error>Stop or Kill worker %s failed</error>', $worker->getId()));
         }
 
         $resque->pruneDeadWorkers();
