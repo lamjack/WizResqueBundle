@@ -6,6 +6,7 @@
 
 namespace Wiz\ResqueBundle\Job;
 
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpKernel\KernelInterface;
 
@@ -45,8 +46,13 @@ abstract class ContainerAwareJob extends Job
      */
     private function createKernel()
     {
+        $fs = new Filesystem();
+        $rootDir = $this->args['kernel.root_dir'];
+        if (!$fs->exists($rootDir)) {
+            $rootDir = realpath(__DIR__ . '/../../../../app');
+        }
         $finder = new Finder();
-        $finder->name('*Kernel.php')->depth(0)->in($this->args['kernel.root_dir']);
+        $finder->name('*Kernel.php')->depth(0)->in($rootDir);
         $results = iterator_to_array($finder);
         /** @var \Symfony\Component\Finder\SplFileInfo $file */
         $file = current($results);
