@@ -102,7 +102,7 @@ class Resque
     /**
      * 入队
      *
-     * @param Job $job
+     * @param Job  $job
      * @param bool $track_status
      *
      * @return null|\Resque_Job_Status
@@ -134,7 +134,7 @@ class Resque
      * 设置Job执行时间
      *
      * @param \Datetime|int $at
-     * @param Job $job
+     * @param Job           $job
      */
     public function enqueueAt($at, Job $job)
     {
@@ -239,7 +239,7 @@ class Resque
         );
 
         foreach ($jobs as $job) {
-            array_push($out, new FailedJob(json_decode($jobs, true)));
+            array_push($out, new FailedJob(json_decode($job, true)));
         }
 
         return $out;
