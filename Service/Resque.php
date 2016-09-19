@@ -100,6 +100,22 @@ class Resque
     }
 
     /**
+     * 增加自定义日志插件
+     *
+     * @param Logger $logger
+     * @param bool   $vverbose
+     * @param int    $queueSizeLimit
+     */
+    public function addLogger(Logger $logger, $vverbose = false, $queueSizeLimit = 10)
+    {
+        \Wiz\ResqueBundle\Logger\Resque::init([
+            'logger' => $logger,
+            'vverbose' => $vverbose,
+            'queueSizeLimit' => $queueSizeLimit
+        ]);
+    }
+
+    /**
      * 入队
      *
      * @param Job  $job

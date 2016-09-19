@@ -35,6 +35,7 @@ if ($APP_INCLUDE) {
 if (!isset($logger) || !is_object($logger)) {
     $logger = new Resque_Log($logLevel);
 }
+
 $BLOCKING = getenv('BLOCKING') !== FALSE;
 $interval = 5;
 $INTERVAL = getenv('INTERVAL');
@@ -58,10 +59,8 @@ $redis->pconnect(Resque_Redis::DEFAULT_HOST, Resque_Redis::DEFAULT_PORT);
 $log = new \Monolog\Logger('workers');
 $logHandle = new \Monolog\Handler\RedisHandler($redis, \Resque_Redis::getPrefix() . 'logs');
 $log->pushHandler($logHandle);
-\Wiz\ResqueBundle\Resque\LogPlugin::init([
-    'logger' => $log,
-    'vverbose' => true
-]);
+
+\Wiz\ResqueBundle\Resque\LogPlugin::init(['logger' => $log, 'vverbose' => true]);
 
 // Retry
 Resque_Event::listen('onFailure', function (Exception $e, Resque_Job $job) use ($logger) {
@@ -83,22 +82,22 @@ Resque_Event::listen('onFailure', function (Exception $e, Resque_Job $job) use (
     if ($delay == 0) {
         Resque::enqueue($job->queue, $job->payload['class'], $args);
         $logger->log(
-            \Psr\Log\LogLevel::ERROR,
-            'Job failed. Auto re-queued, attempt number: {attempt}',
-            array(
-                'attempt' => $args[\Wiz\ResqueBundle\Job\Job::RETRY_ATTEMPT] - 1
-            )
+                \Psr\Log\LogLevel::ERROR,
+                'Job failed. Auto re-queued, attempt number: {attempt}',
+                array(
+                        'attempt' => $args[\Wiz\ResqueBundle\Job\Job::RETRY_ATTEMPT] - 1
+                )
         );
     } else {
         $at = time() + $delay;
         ResqueScheduler::enqueueAt($at, $job->queue, $job->payload['class'], $args);
         $logger->log(
-            \Psr\Log\LogLevel::ERROR,
-            'Job failed. Auto re-queued. Scheduled for: {timestamp}, attempt number: {attempt}',
-            array(
-                'timestamp' => date('Y-m-d H:i:s', $at),
-                'attempt' => $args[\Wiz\ResqueBundle\Job\Job::RETRY_ATTEMPT] - 1
-            )
+                \Psr\Log\LogLevel::ERROR,
+                'Job failed. Auto re-queued. Scheduled for: {timestamp}, attempt number: {attempt}',
+                array(
+                        'timestamp' => date('Y-m-d H:i:s', $at),
+                        'attempt' => $args[\Wiz\ResqueBundle\Job\Job::RETRY_ATTEMPT] - 1
+                )
         );
     }
 });
