@@ -53,13 +53,14 @@ if (!empty($PREFIX)) {
     Resque_Redis::prefix($PREFIX);
 }
 
-// Custom event listener
+// 自定义日志系统
 $redis = new Redis();
 $redis->pconnect(Resque_Redis::DEFAULT_HOST, Resque_Redis::DEFAULT_PORT);
-$log = new \Monolog\Logger('workers');
+$log = new \Monolog\Logger('resque');
 $logHandle = new \Monolog\Handler\RedisHandler($redis, \Resque_Redis::getPrefix() . 'logs');
+//$formatter = new \Monolog\Formatter\LogstashFormatter('marathon');
+//$logHandle->setFormatter($formatter);
 $log->pushHandler($logHandle);
-
 \Wiz\ResqueBundle\Resque\LogPlugin::init(['logger' => $log, 'vverbose' => true]);
 
 // Retry
