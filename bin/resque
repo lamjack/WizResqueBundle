@@ -7,6 +7,8 @@ if (empty($QUEUE)) {
 require_once __DIR__ . "/../../../autoload.php";
 $REDIS_BACKEND = getenv('REDIS_BACKEND');
 $REDIS_BACKEND_DB = getenv('REDIS_BACKEND_DB');
+$REDIS_HOST = empty(getenv('REDIS_HOST')) ? Resque_Redis::DEFAULT_HOST : getenv('REDIS_HOST');
+$REDIS_PORT = empty(getenv('REDIS_PORT')) ? Resque_Redis::DEFAULT_PORT : getenv('REDIS_PORT');
 if (!empty($REDIS_BACKEND)) {
     if (empty($REDIS_BACKEND_DB)) {
         Resque::setBackend($REDIS_BACKEND);
@@ -45,7 +47,7 @@ if (!empty($INTERVAL)) {
 $count = 1;
 $COUNT = getenv('COUNT');
 if (!empty($COUNT) && $COUNT > 1) {
-    $count = $COUNT;
+    $count = intval($COUNT);
 }
 $PREFIX = getenv('PREFIX');
 if (!empty($PREFIX)) {
@@ -55,11 +57,9 @@ if (!empty($PREFIX)) {
 
 // 自定义日志系统
 $redis = new Redis();
-$redis->pconnect(Resque_Redis::DEFAULT_HOST, Resque_Redis::DEFAULT_PORT);
+$redis->pconnect($REDIS_HOST, $REDIS_PORT);
 $log = new \Monolog\Logger('resque');
 $logHandle = new \Monolog\Handler\RedisHandler($redis, \Resque_Redis::getPrefix() . 'logs');
-//$formatter = new \Monolog\Formatter\LogstashFormatter('marathon');
-//$logHandle->setFormatter($formatter);
 $log->pushHandler($logHandle);
 \Wiz\ResqueBundle\Resque\LogPlugin::init(['logger' => $log, 'vverbose' => true]);
 

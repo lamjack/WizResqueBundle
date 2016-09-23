@@ -12,7 +12,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Process;
-use Wiz\ResqueBundle\Event\WorkerEvent;
 
 /**
  * Class StartWorkerCommand
@@ -56,7 +55,7 @@ class StartWorkerCommand extends ContainerAwareCommand
         }
 
         $env['APP_INCLUDE'] = $this->getContainer()->getParameter('kernel.root_dir') . '/bootstrap.php.cache';
-        $env['COUNT'] = $input->getOption('count');
+        $env['COUNT'] = intval($input->getOption('count'));
         $env['INTERVAL'] = $input->getOption('interval');
         $env['QUEUE'] = $input->getArgument('queues');
         $env['VERBOSE'] = 1;
@@ -76,6 +75,12 @@ class StartWorkerCommand extends ContainerAwareCommand
         $redisHost = $this->getContainer()->getParameter('wiz_resque.resque.redis.host');
         $redisPort = $this->getContainer()->getParameter('wiz_resque.resque.redis.port');
         $redisDatabase = $this->getContainer()->getParameter('wiz_resque.resque.redis.database');
+
+        if (null !== $redisHost)
+            $env['REDIS_HOST'] = $redisHost;
+
+        if (null !== $redisPort)
+            $env['REDIS_PORT'] = $redisPort;
 
         if ($redisHost != null && $redisPort != null) {
             $env['REDIS_BACKEND'] = $redisHost . ':' . $redisPort;
