@@ -235,9 +235,9 @@ class Resque
      */
     public function clearQueue($queue)
     {
-        /** @var \Redis $redis */
+        /** @var \Resque_Redis $redis */
         $redis = \Resque::redis();
-        $size = $redis->lLen('queue:' . $queue);
+        $size = $redis->llen('queue:' . $queue);
         $redis->del('queue:' . $queue);
         return $size;
     }
