@@ -57,7 +57,7 @@ if (!empty($PREFIX)) {
 
 // 自定义日志系统
 $redis = new Redis();
-$redis->pconnect($REDIS_HOST, $REDIS_PORT);
+$redis->connect($REDIS_HOST, $REDIS_PORT);
 $log = new \Monolog\Logger('resque');
 $logHandle = new \Monolog\Handler\RedisHandler($redis, \Resque_Redis::getPrefix() . 'logs');
 $log->pushHandler($logHandle);
@@ -83,22 +83,22 @@ Resque_Event::listen('onFailure', function (Exception $e, Resque_Job $job) use (
     if ($delay == 0) {
         Resque::enqueue($job->queue, $job->payload['class'], $args);
         $logger->log(
-                \Psr\Log\LogLevel::ERROR,
-                'Job failed. Auto re-queued, attempt number: {attempt}',
-                array(
-                        'attempt' => $args[\Wiz\ResqueBundle\Job\Job::RETRY_ATTEMPT] - 1
-                )
+            \Psr\Log\LogLevel::ERROR,
+            'Job failed. Auto re-queued, attempt number: {attempt}',
+            array(
+                'attempt' => $args[\Wiz\ResqueBundle\Job\Job::RETRY_ATTEMPT] - 1
+            )
         );
     } else {
         $at = time() + $delay;
         ResqueScheduler::enqueueAt($at, $job->queue, $job->payload['class'], $args);
         $logger->log(
-                \Psr\Log\LogLevel::ERROR,
-                'Job failed. Auto re-queued. Scheduled for: {timestamp}, attempt number: {attempt}',
-                array(
-                        'timestamp' => date('Y-m-d H:i:s', $at),
-                        'attempt' => $args[\Wiz\ResqueBundle\Job\Job::RETRY_ATTEMPT] - 1
-                )
+            \Psr\Log\LogLevel::ERROR,
+            'Job failed. Auto re-queued. Scheduled for: {timestamp}, attempt number: {attempt}',
+            array(
+                'timestamp' => date('Y-m-d H:i:s', $at),
+                'attempt' => $args[\Wiz\ResqueBundle\Job\Job::RETRY_ATTEMPT] - 1
+            )
         );
     }
 });
