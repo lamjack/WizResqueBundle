@@ -35,7 +35,7 @@ class StopScheduledWorkerCommand extends ContainerAwareCommand
      * execute() method, you set the code to execute by passing
      * a Closure to the setCode() method.
      *
-     * @param InputInterface $input   An InputInterface instance
+     * @param InputInterface  $input An InputInterface instance
      * @param OutputInterface $output An OutputInterface instance
      *
      * @return null|int null or 0 if everything went fine, or an error code
@@ -50,13 +50,14 @@ class StopScheduledWorkerCommand extends ContainerAwareCommand
         $pid_file = $this->getContainer()->get('kernel')->getLogDir() . DIRECTORY_SEPARATOR . Constant::PID_FILE;
         if (!$fs->exists($pid_file)) {
             $output->writeln('<error>No PID file found</error>');
+
             return -1;
         }
         $pid = file_get_contents($pid_file);
         $output->writeln(sprintf('Killing process <info>%d</info>', $pid));
         posix_kill($pid, SIGTERM);
         $fs->remove($pid_file);
+
         return 0;
     }
-
 }

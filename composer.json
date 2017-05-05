@@ -11,7 +11,7 @@
         }
     ],
     "require": {
-        "symfony/framework-bundle": ">=2.3,<3.0",
+        "symfony/framework-bundle": "^2.7 || ^3.0",
         "chrisboulton/php-resque": "dev-master",
         "chrisboulton/php-resque-scheduler": "dev-master"
     },

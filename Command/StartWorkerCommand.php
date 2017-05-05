@@ -19,6 +19,9 @@ use Symfony\Component\Process\Process;
  */
 class StartWorkerCommand extends ContainerAwareCommand
 {
+    /**
+     * {@inheritdoc}
+     */
     protected function configure()
     {
         $this
@@ -32,10 +35,7 @@ class StartWorkerCommand extends ContainerAwareCommand
     }
 
     /**
-     * @param InputInterface $input
-     * @param OutputInterface $output
-     *
-     * @return int
+     * {@inheritdoc}
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
@@ -133,7 +133,7 @@ class StartWorkerCommand extends ContainerAwareCommand
 
         // 前台运行则不另启进程
         if ($input->getOption('foreground')) {
-            $process->run(function ($type, $buffer) use ($output) {
+            $process->run(function($type, $buffer) use ($output) {
                 $output->write($buffer);
             });
         } else {
