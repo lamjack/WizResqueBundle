@@ -151,4 +151,12 @@ class StartWorkerCommand extends ContainerAwareCommand
 
         return 0;
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function isEnabled()
+    {
+        return false;
+    }
 }

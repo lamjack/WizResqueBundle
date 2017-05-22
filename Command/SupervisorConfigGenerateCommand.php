@@ -149,6 +149,7 @@ class SupervisorConfigGenerateCommand extends ContainerAwareCommand
             "<fg=white;bg=blue>请复制配置内容至 /etc/supervisord.d/{$projectName}.conf</>",
             "<fg=white;bg=blue>并执行 supervisorctl reload</>"
         ]);
+
         return 0;
     }
 

@@ -29,7 +29,7 @@ class StopWorkerCommand extends ContainerAwareCommand
     }
 
     /**
-     * @param InputInterface $input
+     * @param InputInterface  $input
      * @param OutputInterface $output
      *
      * @return int
@@ -53,6 +53,7 @@ class StopWorkerCommand extends ContainerAwareCommand
                 } else {
                     $output->writeln('<error>There is no running worker.</error>');
                 }
+
                 return 1;
             }
             $workers = array($worker);
@@ -74,5 +75,13 @@ class StopWorkerCommand extends ContainerAwareCommand
         $resque->pruneDeadWorkers();
 
         return 0;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function isEnabled()
+    {
+        return false;
     }
 }
