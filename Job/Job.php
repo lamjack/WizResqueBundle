@@ -58,6 +58,52 @@ abstract class Job
         $this->run($this->args);
     }
 
+    /**
+     * Get args
+     *
+     * @param string $key
+     *
+     * @return mixed|null
+     */
+    public function getArg($key)
+    {
+        if (array_key_exists($key, $this->args)) {
+            return $this->args[$key];
+        }
+
+        return null;
+    }
+
+    /**
+     * Get args
+     *
+     * @return array
+     */
+    public function getArgs()
+    {
+        return $this->args;
+    }
+
+    /**
+     * Set args
+     *
+     * @param array $args
+     */
+    public function setArgs(array $args)
+    {
+        $this->args = array_merge($this->args, $args);
+    }
+
+    /**
+     * Set arg
+     *
+     * @param string $key
+     * @param string $value
+     */
+    public function setArg($key, $value)
+    {
+        $this->args[$key] = $value;
+    }
 
     /**
      * @param $args

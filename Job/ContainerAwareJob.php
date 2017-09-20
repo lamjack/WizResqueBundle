@@ -38,6 +38,7 @@ abstract class ContainerAwareJob extends Job
             $this->kernel = $this->createKernel();
             $this->kernel->boot();
         }
+
         return $this->kernel->getContainer();
     }
 
