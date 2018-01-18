@@ -137,13 +137,13 @@ class Resque
             'vverbose' => true
         ]);
 
-        $result = \Resque::enqueue($job->queue, get_class($job), $job->args, $track_status);
+        $token = \Resque::enqueue($job->queue, get_class($job), $job->args, $track_status);
 
         if ($track_status) {
-            return new \Resque_Job_Status($result);
+            return new \Resque_Job_Status($token);
         }
 
-        return null;
+        return $token;
     }
 
     /**
