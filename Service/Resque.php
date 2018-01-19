@@ -120,10 +120,11 @@ class Resque
      *
      * @param Job  $job
      * @param bool $track_status
+     * @param bool $get_token 是否返回token,并追踪状态
      *
      * @return null|\Resque_Job_Status
      */
-    public function enqueue(Job $job, $track_status = false)
+    public function enqueue(Job $job, $track_status = false , $get_token = false)
     {
         $this->jobReady($job);
 
@@ -140,10 +141,18 @@ class Resque
         $token = \Resque::enqueue($job->queue, get_class($job), $job->args, $track_status);
 
         if ($track_status) {
+            if($get_token){
+                // 如果返回token,则可以方便的通过token追踪job在队列中的执行状态
+                return $token;
+            }
             return new \Resque_Job_Status($token);
         }
 
-        return $token;
+        if($get_token){
+            // 如果返回token,如果没开 track_status 即使有token也查不到job的状态,这点需要注意!
+            return $token;
+        }
+        return null;
     }
 
     /**
