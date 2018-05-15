@@ -7,7 +7,7 @@
         {
             "name": "JackLam",
             "email": "jack@wizmacau.com",
-            "homepage": "https://jacklam.it"
+            "homepage": "https://lamjack.github.io"
         }
     ],
     "require": {
@@ -20,13 +20,5 @@
             "Wiz\\ResqueBundle\\": ""
         }
     },
-    "bin": [
-        "bin/resque",
-        "bin/resque-scheduler"
-    ],
-    "extra": {
-        "branch-alias": {
-            "dev-master": "2.8.x-dev"
-        }
-    }
+    "bin": ["bin/resque", "bin/resque-scheduler"]
 }
